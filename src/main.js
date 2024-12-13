@@ -1,13 +1,7 @@
 const { app, BrowserWindow, session } = require('electron');
 const Store = require('electron-store');
-const path = require('path');
 
 const store = new Store();
-
-// Set dock icon for macOS
-if (process.platform === 'darwin') {
-  app.dock.setIcon(path.join(__dirname, '../build/icon.png'));
-}
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -18,15 +12,13 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      webSecurity: false  // Required for Amazon's authentication
+      webSecurity: false
     },
     backgroundColor: '#ffffff',
     autoHideMenuBar: true,
-    frame: true,
-    icon: path.join(__dirname, '../build/icon.png')
+    frame: true
   });
 
-  // Set Android user agent and modify headers
   const userAgent = 'Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
   
   session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
@@ -39,7 +31,6 @@ function createWindow() {
 
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const responseHeaders = details.responseHeaders;
-    // Remove restrictive headers
     delete responseHeaders['X-Frame-Options'];
     delete responseHeaders['Content-Security-Policy'];
     callback({
@@ -50,25 +41,19 @@ function createWindow() {
     });
   });
 
-  // Load the URL directly instead of using a webview
   mainWindow.loadURL('https://read.amazon.com/kindle-notebook');
-
-  // Optional: Enable DevTools for debugging
-  // mainWindow.webContents.openDevTools();
 }
 
-app.whenReady().then(() => {
-  createWindow();
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
-  });
-});
+app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
+  }
+});
+
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
   }
 }); 

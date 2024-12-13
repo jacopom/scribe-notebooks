@@ -5,28 +5,47 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder",
-    "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "build:mac": "electron-builder --mac"
   },
-  "author": "",
-  "license": "MIT",
   "build": {
     "appId": "com.scribenotebook.app",
     "productName": "Scribe Notebook",
     "mac": {
-      "category": "public.app-category.productivity",
-      "icon": "build/icon.png"
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["arm64", "x64"]
+        }
+      ],
+      "category": "public.app-category.productivity"
     },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
     "directories": {
       "output": "dist"
     }
   },
   "devDependencies": {
     "electron": "^29.0.0",
-    "electron-builder": "^24.0.0"
+    "electron-builder": "^24.13.3"
   },
   "dependencies": {
     "electron-store": "^8.1.0"
   }
-} 
+}
