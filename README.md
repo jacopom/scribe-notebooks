@@ -3,6 +3,9 @@ A lightweight desktop application wrapper for Kindle Notebook, enabling seamless
 
 ![SCR-20241213-uikj](https://github.com/user-attachments/assets/97ecb04e-8553-49d3-8ccd-7c2d35af4745)
 
+![SCR-20241213-unje](https://github.com/user-attachments/assets/3da4e6a1-5a5b-4921-8aca-04670d111102)
+
+
 ## Features
 - 🌐 Direct access to Kindle Notebook web interface
 - 💻 Cross-platform desktop experience
