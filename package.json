@@ -1,0 +1,32 @@
+{
+  "name": "scribe-notebook",
+  "version": "1.0.0",
+  "description": "Kindle Notebook desktop application",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "author": "",
+  "license": "MIT",
+  "build": {
+    "appId": "com.scribenotebook.app",
+    "productName": "Scribe Notebook",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png"
+    },
+    "directories": {
+      "output": "dist"
+    }
+  },
+  "devDependencies": {
+    "electron": "^29.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0"
+  }
+} 

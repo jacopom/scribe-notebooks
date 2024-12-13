@@ -1,0 +1,46 @@
+mkdir scribe-notebook
+cd scribe-notebook
+npm init -y
+npm install electron electron-builder electron-store 
+mkdir -p build
+
+# Create an iconset directory
+mkdir build/icon.iconset
+
+# Copy your PNG file with different sizes (assuming your original is 1024x1024)
+sips -z 16 16     your-icon.png --out build/icon.iconset/icon_16x16.png
+sips -z 32 32     your-icon.png --out build/icon.iconset/icon_16x16@2x.png
+sips -z 32 32     your-icon.png --out build/icon.iconset/icon_32x32.png
+sips -z 64 64     your-icon.png --out build/icon.iconset/icon_32x32@2x.png
+sips -z 128 128   your-icon.png --out build/icon.iconset/icon_128x128.png
+sips -z 256 256   your-icon.png --out build/icon.iconset/icon_128x128@2x.png
+sips -z 256 256   your-icon.png --out build/icon.iconset/icon_256x256.png
+sips -z 512 512   your-icon.png --out build/icon.iconset/icon_256x256@2x.png
+sips -z 512 512   your-icon.png --out build/icon.iconset/icon_512x512.png
+sips -z 1024 1024 your-icon.png --out build/icon.iconset/icon_512x512@2x.png
+
+# Convert the iconset to icns
+iconutil -c icns build/icon.iconset -o build/icon.icns
+
+# Move the icon to the build directory
+cp icon.png build/icon.png
+
+# Clear macOS icon cache
+killall Dock
+
+# Initialize git repository
+git init
+
+# Add .gitignore
+git add .gitignore
+
+# Make initial commit
+git add .
+git commit -m "Initial commit: Scribe Notebook Electron app"
+
+# Add your GitHub repository as remote (replace with your repository URL)
+git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+
+# Push to main branch
+git branch -M main
+git push -u origin main

@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Production build
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Electron specific
+.electron-builder.env 
