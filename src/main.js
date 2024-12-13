@@ -4,6 +4,8 @@ const Store = require('electron-store');
 const store = new Store();
 
 function createWindow() {
+  const userAgent = 'Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
+  
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 900,
@@ -19,8 +21,8 @@ function createWindow() {
     frame: true
   });
 
-  const userAgent = 'Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
-  
+  mainWindow.webContents.setUserAgent(userAgent);
+
   session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
     details.requestHeaders['User-Agent'] = userAgent;
     details.requestHeaders['Sec-Fetch-Site'] = 'none';
@@ -41,7 +43,7 @@ function createWindow() {
     });
   });
 
-  mainWindow.loadURL('https://read.amazon.com/kindle-notebook');
+  mainWindow.loadURL('https://read.amazon.com/kindle-notebook?ref_=neo_mm_yn_na_kfa');
 }
 
 app.whenReady().then(createWindow);

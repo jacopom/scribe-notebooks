@@ -5,33 +5,15 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
-    "build:mac": "electron-builder --mac"
+    "build:mac": "electron-builder --mac zip"
   },
   "build": {
     "appId": "com.scribenotebook.app",
     "productName": "Scribe Notebook",
+    "asar": false,
     "mac": {
-      "target": [
-        {
-          "target": "dmg",
-          "arch": ["arm64", "x64"]
-        }
-      ],
-      "category": "public.app-category.productivity"
-    },
-    "dmg": {
-      "contents": [
-        {
-          "x": 130,
-          "y": 220
-        },
-        {
-          "x": 410,
-          "y": 220,
-          "type": "link",
-          "path": "/Applications"
-        }
-      ]
+      "target": "zip",
+      "identity": null
     },
     "files": [
       "src/**/*",
