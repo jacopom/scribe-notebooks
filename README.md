@@ -1,14 +1,11 @@
-# Scribe Notebook
-
-A desktop application wrapper for Kindle Notebook, built with Electron.
+# Scribe Notebooks
+A lightweight desktop application wrapper for Kindle Notebook, enabling seamless access to your Kindle reading notes.
 
 ## Features
-
-- Clean, minimal interface
-- Android user agent support
-- Persistent login session
-- Full-screen reading experience
-- Custom application icon
+- 🌐 Direct access to Kindle Notebook web interface
+- 💻 Cross-platform desktop experience
+- 🔒 Persistent login session
+- 🖥️ Minimal, distraction-free interface
 
 ## Development
 
@@ -19,4 +16,42 @@ A desktop application wrapper for Kindle Notebook, built with Electron.
 
 ### Setup
 1. Clone the repository
-2. Install dependencies: 
+```bash
+git clone git@github.com:jacopom/scribe-notebooks.git
+cd scribe-notebooks
+```
+
+2. Install dependencies
+```bash
+npm install
+```
+
+3. Development Mode
+```bash
+npm run dev
+```
+
+### Building
+Create production builds for different platforms:
+
+#### Mac
+```bash
+npm run build:mac
+```
+
+#### Windows
+```bash
+npm run build:win
+```
+
+#### Linux
+```bash
+npm run build:linux
+```
+
+
+## License
+[MIT License](LICENSE)
+
+## Disclaimer
+This application is an unofficial wrapper and is not affiliated with Amazon or Kindle.
