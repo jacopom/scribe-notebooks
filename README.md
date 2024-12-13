@@ -1,5 +1,5 @@
 # Scribe Notebooks
-A lightweight desktop application wrapper for Kindle Notebook, enabling seamless access to your Kindle reading notes.
+A lightweight desktop application wrapper for Kindle Notebook, enabling seamless access to your Kindle Scribe notebooks.
 
 ![SCR-20241213-uikj](https://github.com/user-attachments/assets/97ecb04e-8553-49d3-8ccd-7c2d35af4745)
 
