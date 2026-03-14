@@ -24,7 +24,7 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build:mac
+        run: npm run build:mac -- --publish never
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
