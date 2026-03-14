@@ -9,6 +9,8 @@ jobs:
   build-mac:
     name: Build macOS
     runs-on: macos-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
@@ -32,6 +34,5 @@ jobs:
           files: |
             dist/*.dmg
             dist/*.zip
-          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
