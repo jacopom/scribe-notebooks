@@ -102,6 +102,7 @@ function createWindow() {
     height: 900,
     minWidth: 900,
     minHeight: 600,
+    show: false,
     autoHideMenuBar: true,
     backgroundColor: '#ffffff',
     webPreferences: {
@@ -140,8 +141,11 @@ function createWindow() {
   }
 
   win.on('resize', resizeContentView);
-  win.once('show', resizeContentView);
-  resizeContentView();
+
+  win.once('ready-to-show', () => {
+    win.show();
+    resizeContentView();
+  });
 
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
   contentView.webContents.loadURL(HOME_URL);
@@ -174,6 +178,7 @@ function createWindow() {
   });
 
   win.on('closed', () => {
+    ipcMain.removeHandler('open-login');
     ipcMain.removeHandler('nav:back');
     ipcMain.removeHandler('nav:forward');
     ipcMain.removeHandler('nav:reload');
