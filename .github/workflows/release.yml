@@ -34,5 +34,18 @@ jobs:
           files: |
             dist/*.dmg
             dist/*.zip
+          body: |
+            ## Install
+
+            1. Download `Scribe.Notebook-*-arm64.dmg`, open it, and drag **Scribe Notebook** to your Applications folder.
+            2. Run this command in Terminal to bypass Gatekeeper (required — app is not notarized):
+
+            ```bash
+            xattr -cr /Applications/Scribe\ Notebook.app
+            ```
+
+            3. Open the app normally. You only need to do this once.
+
+            > **Alternative:** System Settings → Privacy & Security → scroll to Security → click **Open Anyway**.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
