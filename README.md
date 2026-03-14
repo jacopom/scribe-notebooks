@@ -6,6 +6,24 @@ A lightweight desktop application wrapper for Kindle Notebook, enabling seamless
 ![SCR-20241213-unje](https://github.com/user-attachments/assets/3da4e6a1-5a5b-4921-8aca-04670d111102)
 
 
+## Download
+
+Download the latest release from the [Releases page](https://github.com/jacopom/scribe-notebooks/releases/latest).
+
+Grab the `.dmg` file, open it, and drag **Scribe Notebook** to your Applications folder.
+
+### "Apple could not verify this app" — Gatekeeper bypass
+
+Because the app is not notarized with an Apple Developer certificate, macOS will block it on first launch. To fix this, run the following command in Terminal after installing:
+
+```bash
+xattr -cr /Applications/Scribe\ Notebook.app
+```
+
+Then open the app normally. You only need to do this once.
+
+---
+
 ## Features
 - 🌐 Direct access to Kindle Notebook web interface
 - 💻 Cross-platform desktop experience
