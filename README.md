@@ -12,9 +12,9 @@ Download the latest release from the [Releases page](https://github.com/jacopom/
 
 Grab the `.dmg` file, open it, and drag **Scribe Notebook** to your Applications folder.
 
-### "Apple could not verify this app" — Gatekeeper bypass
+### "Scribe Notebook is damaged" / "Apple could not verify this app" — Gatekeeper bypass
 
-Because the app is not notarized with an Apple Developer certificate, macOS will block it on first launch.
+Because the app is not notarized with an Apple Developer certificate, macOS will block it on first launch. You may see either _"is damaged and can't be opened"_ or _"cannot verify that this app is free from malware"_ — both are the same Gatekeeper quarantine and have the same fix.
 
 **Option 1 — Terminal (quickest):**
 
@@ -26,7 +26,7 @@ Then open the app normally.
 
 **Option 2 — System Settings:**
 
-1. Try to open the app — macOS will show the "could not verify" dialog. Click **Done**.
+1. Try to open the app — macOS will show the warning dialog. Click **Cancel** (or **Done**).
 2. Open **System Settings → Privacy & Security**.
 3. Scroll down to the **Security** section. You'll see a message like _"Scribe Notebook was blocked…"_ with an **Open Anyway** button.
 4. Click **Open Anyway**, then confirm in the dialog that appears.
