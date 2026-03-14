@@ -14,13 +14,24 @@ Grab the `.dmg` file, open it, and drag **Scribe Notebook** to your Applications
 
 ### "Apple could not verify this app" — Gatekeeper bypass
 
-Because the app is not notarized with an Apple Developer certificate, macOS will block it on first launch. To fix this, run the following command in Terminal after installing:
+Because the app is not notarized with an Apple Developer certificate, macOS will block it on first launch.
+
+**Option 1 — Terminal (quickest):**
 
 ```bash
 xattr -cr /Applications/Scribe\ Notebook.app
 ```
 
-Then open the app normally. You only need to do this once.
+Then open the app normally.
+
+**Option 2 — System Settings:**
+
+1. Try to open the app — macOS will show the "could not verify" dialog. Click **Done**.
+2. Open **System Settings → Privacy & Security**.
+3. Scroll down to the **Security** section. You'll see a message like _"Scribe Notebook was blocked…"_ with an **Open Anyway** button.
+4. Click **Open Anyway**, then confirm in the dialog that appears.
+
+You only need to do this once.
 
 ---
 
