@@ -1,19 +1,29 @@
 {
   "name": "scribe-notebook",
-  "version": "1.0.0",
-  "description": "Kindle Notebook desktop application",
+  "version": "2.0.0",
+  "description": "Kindle Notebook desktop app — read your Scribe notes on macOS",
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
-    "build:mac": "electron-builder --mac zip"
+    "build:mac": "electron-builder --mac"
   },
   "build": {
     "appId": "com.scribenotebook.app",
     "productName": "Scribe Notebook",
-    "asar": false,
+    "asar": true,
     "mac": {
-      "target": "zip",
+      "target": [
+        { "target": "dmg", "arch": ["arm64"] },
+        { "target": "zip", "arch": ["arm64"] }
+      ],
+      "icon": "build/icon.icns",
+      "darkModeSupport": true,
+      "minimumSystemVersion": "11.0",
       "identity": null
+    },
+    "dmg": {
+      "title": "Scribe Notebook",
+      "backgroundColor": "#ffffff"
     },
     "files": [
       "src/**/*",
@@ -24,10 +34,7 @@
     }
   },
   "devDependencies": {
-    "electron": "^29.0.0",
-    "electron-builder": "^24.13.3"
-  },
-  "dependencies": {
-    "electron-store": "^8.1.0"
+    "electron": "^32.0.0",
+    "electron-builder": "^25.0.0"
   }
 }

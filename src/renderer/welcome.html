@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: #f5f5f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 40px 24px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 40px rgba(0,0,0,0.08);
+      padding: 52px 48px;
+      max-width: 460px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 28px;
+      background: linear-gradient(145deg, #1a6b5c, #0e4d42);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon svg {
+      width: 38px;
+      height: 38px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1d1d1f;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: #6e6e73;
+      line-height: 1.55;
+      margin-bottom: 36px;
+    }
+
+    .privacy-box {
+      background: #f5f5f7;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 32px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      text-align: left;
+    }
+
+    .privacy-box svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      margin-top: 1px;
+      color: #34c759;
+    }
+
+    .privacy-box p {
+      font-size: 13px;
+      color: #3a3a3c;
+      line-height: 1.5;
+    }
+
+    .privacy-box strong {
+      color: #1d1d1f;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      background: #007aff;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    button:hover { opacity: 0.88; }
+    button:active { opacity: 0.75; transform: scale(0.99); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">
+      <!-- notebook icon -->
+      <svg viewBox="0 0 24 24">
+        <rect x="4" y="2" width="14" height="20" rx="2"/>
+        <line x1="8" y1="2" x2="8" y2="22"/>
+        <line x1="11" y1="7" x2="15" y2="7"/>
+        <line x1="11" y1="11" x2="15" y2="11"/>
+        <line x1="11" y1="15" x2="15" y2="15"/>
+      </svg>
+    </div>
+
+    <h1>Welcome to Scribe Notebook</h1>
+    <p class="subtitle">
+      Access your Amazon Kindle Scribe notes directly from your Mac —
+      all your handwritten notes and highlights, in one place.
+    </p>
+
+    <div class="privacy-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      <p>
+        <strong>Your credentials stay private.</strong><br/>
+        Signing in opens Amazon's official page in a secure window.
+        We never see your password, passkey, or account details —
+        everything goes directly to Amazon's servers.
+      </p>
+    </div>
+
+    <button id="sign-in-btn">Sign in to Amazon</button>
+  </div>
+
+  <script>
+    document.getElementById('sign-in-btn').addEventListener('click', () => {
+      window.api.openLogin();
+    });
+  </script>
+</body>
+</html>

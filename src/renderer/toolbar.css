@@ -1,0 +1,112 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --toolbar-height: 44px;
+  --btn-size: 28px;
+  --accent: #007AFF;
+  --disabled: #c0c0c0;
+  --bg: rgba(246, 246, 246, 0.92);
+  --separator: rgba(0, 0, 0, 0.10);
+}
+
+html, body {
+  height: var(--toolbar-height);
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#toolbar {
+  display: flex;
+  align-items: center;
+  height: var(--toolbar-height);
+  background: var(--bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--separator);
+  padding: 0 8px;
+  gap: 2px;
+  position: relative;
+}
+
+#progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 0 1px 1px 0;
+  transition: width 0.2s ease, opacity 0.3s ease;
+  opacity: 0;
+}
+
+#progress-bar.loading {
+  opacity: 1;
+}
+
+button {
+  -webkit-app-region: no-drag;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--btn-size);
+  height: var(--btn-size);
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--accent);
+  transition: background 0.12s ease, opacity 0.12s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+button:hover:not(:disabled) {
+  background: rgba(0, 122, 255, 0.08);
+}
+
+button:active:not(:disabled) {
+  background: rgba(0, 122, 255, 0.16);
+  transform: scale(0.92);
+}
+
+button:disabled {
+  color: var(--disabled);
+  cursor: default;
+}
+
+button svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+#spinner {
+  margin-left: auto;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(0, 122, 255, 0.2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+  -webkit-app-region: no-drag;
+}
+
+#spinner.visible {
+  opacity: 1;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
