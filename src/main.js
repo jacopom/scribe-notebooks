@@ -48,19 +48,19 @@ function openLoginWindow(contentView) {
 
   loginWin.loadURL('https://www.amazon.com/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fread.amazon.com%2Fkindle-notebook&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=amzn_kindle_mykindle_us&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0');
 
-  // Detect successful login by watching for redirect back to notebook
-  loginWin.webContents.on('did-navigate', (_, url) => {
+  // Auto-close popup once login lands back on read.amazon.com
+  function onNavigate(_, url) {
     if (url.includes('read.amazon.com') && !isLoginUrl(url)) {
       loginWin.close();
-      contentView.webContents.loadURL(HOME_URL);
     }
-  });
+  }
+  loginWin.webContents.on('did-navigate', onNavigate);
+  loginWin.webContents.on('did-navigate-in-page', onNavigate);
 
-  loginWin.webContents.on('did-navigate-in-page', (_, url) => {
-    if (url.includes('read.amazon.com') && !isLoginUrl(url)) {
-      loginWin.close();
-      contentView.webContents.loadURL(HOME_URL);
-    }
+  // Always reload the main view when the popup closes — session cookies are
+  // shared, so whatever Amazon the user authenticated against is already live.
+  loginWin.on('closed', () => {
+    contentView.webContents.loadURL(HOME_URL);
   });
 }
 
