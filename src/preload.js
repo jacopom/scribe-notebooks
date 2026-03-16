@@ -7,6 +7,9 @@ contextBridge.exposeInMainWorld('api', {
   goHome:    () => ipcRenderer.invoke('nav:home'),
   openLogin: () => ipcRenderer.invoke('open-login'),
 
+  exportPDF:  () => ipcRenderer.invoke('export:pdf'),
+
   onNavState: (cb) => ipcRenderer.on('nav-state', (_, state) => cb(state)),
   onLoading:  (cb) => ipcRenderer.on('loading',   (_, busy)  => cb(busy)),
+  onExportDone: (cb) => ipcRenderer.on('export:done', (_, result) => cb(result)),
 });

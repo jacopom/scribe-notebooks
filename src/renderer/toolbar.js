@@ -2,6 +2,7 @@ const btnBack    = document.getElementById('btn-back');
 const btnForward = document.getElementById('btn-forward');
 const btnReload  = document.getElementById('btn-reload');
 const btnHome    = document.getElementById('btn-home');
+const btnExport  = document.getElementById('btn-export');
 const spinner    = document.getElementById('spinner');
 const progressBar = document.getElementById('progress-bar');
 
@@ -41,6 +42,12 @@ btnReload.addEventListener('click', () => {
 window.api.onNavState(({ canGoBack, canGoForward }) => {
   btnBack.disabled    = !canGoBack;
   btnForward.disabled = !canGoForward;
+});
+
+btnExport.addEventListener('click', async () => {
+  btnExport.disabled = true;
+  await window.api.exportPDF();
+  btnExport.disabled = false;
 });
 
 window.api.onLoading((isLoading) => {
