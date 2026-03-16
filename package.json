@@ -6,7 +6,8 @@
   "scripts": {
     "start": "electron .",
     "build:mac": "electron-builder --mac",
-    "build:win": "electron-builder --win"
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux"
   },
   "build": {
     "appId": "com.scribenotebook.app",
@@ -27,6 +28,14 @@
         { "target": "nsis", "arch": ["x64", "arm64"] }
       ],
       "icon": "build/icon.ico"
+    },
+    "linux": {
+      "target": [
+        { "target": "AppImage", "arch": ["x64", "arm64"] },
+        { "target": "deb", "arch": ["x64", "arm64"] }
+      ],
+      "icon": "build/icon.png",
+      "category": "Network"
     },
     "nsis": {
       "oneClick": true,
