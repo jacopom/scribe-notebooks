@@ -1,11 +1,12 @@
 {
   "name": "scribe-notebook",
-  "version": "2.0.0",
-  "description": "Kindle Notebook desktop app — read your Scribe notes on macOS",
+  "version": "2.1.0",
+  "description": "Kindle Notebook desktop app — read your Scribe notes on macOS and Windows",
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
-    "build:mac": "electron-builder --mac"
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win"
   },
   "build": {
     "appId": "com.scribenotebook.app",
@@ -20,6 +21,18 @@
       "darkModeSupport": true,
       "minimumSystemVersion": "11.0",
       "identity": null
+    },
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64", "arm64"] }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
     },
     "dmg": {
       "title": "Scribe Notebook",

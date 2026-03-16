@@ -28,14 +28,14 @@ jobs:
       - name: Build
         run: npm run build:mac -- --publish never
 
-      - name: Create GitHub Release
+      - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             dist/*.dmg
             dist/*.zip
           body: |
-            ## Install
+            ## macOS
 
             1. Download `Scribe.Notebook-*-arm64.dmg`, open it, and drag **Scribe Notebook** to your Applications folder.
             2. Run this command in Terminal to bypass Gatekeeper (required — app is not notarized):
@@ -47,5 +47,40 @@ jobs:
             3. Open the app normally. You only need to do this once.
 
             > **Alternative:** System Settings → Privacy & Security → scroll to Security → click **Open Anyway**.
+
+            ## Windows
+
+            1. Download `Scribe.Notebook-*-Setup.exe` and run it.
+            2. The app installs silently and launches automatically.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-win:
+    name: Build Windows
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build:win -- --publish never
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
