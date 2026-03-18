@@ -39,6 +39,9 @@ You only need to do this once.
 - 💻 Cross-platform desktop experience
 - 🔒 Persistent login session
 - 🖥️ Minimal, distraction-free interface
+- 🖨️ Export to pdf or png
+
+![App screenshot](./assets/SCR-20260318-ljra.png)
 
 ## Development
 
