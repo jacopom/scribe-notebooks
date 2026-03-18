@@ -35,13 +35,13 @@ function cropBlackBorders(img) {
     }
   }
 
-  if (bestL >= bestR) return { jpeg: img.toJPEG(92), w: width, h: height };
+  if (bestL >= bestR) return { cropped: img, jpeg: img.toJPEG(92), w: width, h: height };
 
   const cropped = (bestL > 0 || bestR < width)
     ? img.crop({ x: bestL, y: 0, width: bestR - bestL, height })
     : img;
   const { width: w, height: h } = cropped.getSize();
-  return { jpeg: cropped.toJPEG(92), w, h };
+  return { cropped, jpeg: cropped.toJPEG(92), w, h };
 }
 
 // Build a minimal multi-page PDF from an array of JPEG captures.
@@ -101,6 +101,38 @@ function buildPDF(pages) {
   parts.push(Buffer.from(xref));
 
   return Buffer.concat(parts);
+}
+
+// Read Amazon's "Page X of Y" indicator from the DOM
+async function readPageInfo(wc) {
+  return wc.executeJavaScript(`
+    (() => {
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      let node;
+      while ((node = walker.nextNode())) {
+        const m = node.textContent.match(/Page\\s+(\\d+)\\s+of\\s+(\\d+)/i);
+        if (m) return { current: parseInt(m[1]), total: parseInt(m[2]) };
+      }
+      return null;
+    })()
+  `);
+}
+
+// Navigate pages using arrow keys
+async function clickPageNav(wc, direction) {
+  const keyCode = direction === 'next' ? 'Right' : 'Left';
+  wc.sendInputEvent({ type: 'keyDown', keyCode });
+  wc.sendInputEvent({ type: 'keyUp',   keyCode });
+}
+
+// Navigate to a specific 1-based page number
+async function goToPage(wc, target) {
+  for (let attempt = 0; attempt < 60; attempt++) {
+    const info = await readPageInfo(wc);
+    if (!info || info.current === target) break;
+    await clickPageNav(wc, info.current < target ? 'next' : 'prev');
+    await new Promise(r => setTimeout(r, 700));
+  }
 }
 
 const HOME_URL = 'https://read.amazon.com/kindle-notebook?ref_=neo_mm_yn_na_kfa';
@@ -192,6 +224,22 @@ function buildMenu(contentView) {
         { role: 'minimize' }, { role: 'zoom' }, { role: 'close' },
       ],
     },
+    {
+      label: 'Developer',
+      submenu: [
+        {
+          label: 'Toggle DevTools',
+          accelerator: 'CmdOrCtrl+Alt+I',
+          click: () => {
+            if (contentView.webContents.isDevToolsOpened()) {
+              contentView.webContents.closeDevTools();
+            } else {
+              contentView.webContents.openDevTools({ mode: 'detach' });
+            }
+          },
+        },
+      ],
+    },
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
@@ -235,37 +283,130 @@ function createWindow() {
 
   ipcMain.handle('open-login', () => openLoginWindow(contentView));
 
-  ipcMain.handle('export:pdf', async () => {
-    const { filePath } = await dialog.showSaveDialog(win, {
-      title: 'Export Notebook as PDF',
-      defaultPath: 'notebook.pdf',
-      filters: [{ name: 'PDF', extensions: ['pdf'] }],
+  let printDialogWin = null;
+
+  ipcMain.handle('print:open', async () => {
+    if (printDialogWin && !printDialogWin.isDestroyed()) {
+      printDialogWin.focus();
+      return;
+    }
+    printDialogWin = new BrowserWindow({
+      width: 400,
+      height: 318,
+      parent: win,
+      modal: true,
+      resizable: false,
+      minimizable: false,
+      maximizable: false,
+      title: 'Print / Export',
+      autoHideMenuBar: true,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        preload: path.join(__dirname, 'preload-dialog.js'),
+      },
     });
-    if (!filePath) return { cancelled: true };
+    printDialogWin.loadFile(path.join(__dirname, 'renderer', 'print-dialog.html'));
+    printDialogWin.on('closed', () => { printDialogWin = null; });
+  });
 
-    // Scroll to top, then capture all pages by scrolling through the content
-    await contentView.webContents.executeJavaScript(`window.scrollTo(0, 0)`);
-    await new Promise(r => setTimeout(r, 300));
-
-    const { scrollHeight, viewportHeight } = await contentView.webContents.executeJavaScript(`
-      ({ scrollHeight: document.documentElement.scrollHeight, viewportHeight: window.innerHeight })
+  ipcMain.handle('print:get-info', async () => {
+    const rawTitle = await contentView.webContents.executeJavaScript(`document.title || ''`);
+    const notebookTitle = rawTitle.trim() || 'Notebook';
+    const pageInfo = await readPageInfo(contentView.webContents);
+    if (pageInfo) {
+      return { notebookTitle, totalPages: pageInfo.total, currentPageIndex: pageInfo.current - 1 };
+    }
+    // Fallback: scroll-based
+    const { scrollHeight, viewportHeight, scrollY } = await contentView.webContents.executeJavaScript(`
+      ({ scrollHeight: document.documentElement.scrollHeight, viewportHeight: window.innerHeight, scrollY: window.scrollY })
     `);
+    const totalPages = Math.max(1, Math.ceil(scrollHeight / viewportHeight));
+    const currentPageIndex = Math.min(Math.floor(scrollY / viewportHeight), totalPages - 1);
+    return { notebookTitle, totalPages, currentPageIndex };
+  });
 
-    // Capture each viewport-height chunk, auto-cropping black border strips
-    const captures = [];
-    for (let y = 0; y < scrollHeight; y += viewportHeight) {
-      await contentView.webContents.executeJavaScript(`window.scrollTo(0, ${y})`);
-      await new Promise(r => setTimeout(r, 250));
-      const img = await contentView.webContents.capturePage();
-      captures.push(cropBlackBorders(img)); // returns { jpeg, w, h }
+  ipcMain.handle('print:execute', async (_, { format, pages }) => {
+    const wc = contentView.webContents;
+    const rawTitle = await wc.executeJavaScript(`document.title || ''`);
+    const notebookTitle = rawTitle.trim().replace(/[/\\:*?"<>|]/g, '-') || 'notebook';
+
+    // Determine page list (1-based)
+    const pageInfo = await readPageInfo(wc);
+    let pageNums;
+    if (pageInfo) {
+      const total = pageInfo.total;
+      if (pages === 'all') {
+        pageNums = Array.from({ length: total }, (_, i) => i + 1);
+      } else if (pages === 'current') {
+        pageNums = [pageInfo.current];
+      } else {
+        const f = Math.max(1, pages.from);
+        const t = Math.min(total, pages.to);
+        pageNums = Array.from({ length: Math.max(0, t - f + 1) }, (_, i) => f + i);
+      }
+    } else {
+      // Fallback: scroll-based
+      const { scrollHeight, viewportHeight, scrollY } = await wc.executeJavaScript(`
+        ({ scrollHeight: document.documentElement.scrollHeight, viewportHeight: window.innerHeight, scrollY: window.scrollY })
+      `);
+      const total = Math.max(1, Math.ceil(scrollHeight / viewportHeight));
+      pageNums = pages === 'current'
+        ? [Math.floor(scrollY / viewportHeight) + 1]
+        : pages === 'all'
+          ? Array.from({ length: total }, (_, i) => i + 1)
+          : Array.from({ length: pages.to - pages.from + 1 }, (_, i) => pages.from + i);
     }
 
-    // Restore scroll position
-    await contentView.webContents.executeJavaScript(`window.scrollTo(0, 0)`);
+    if (!pageNums.length) return { cancelled: true };
 
-    const pdf = buildPDF(captures);
-    fs.writeFileSync(filePath, pdf);
-    return { ok: true, filePath };
+    const ext = format === 'pdf' ? 'pdf' : 'png';
+    const { filePath } = await dialog.showSaveDialog(printDialogWin || win, {
+      title: 'Save',
+      defaultPath: `${notebookTitle}.${ext}`,
+      filters: format === 'pdf'
+        ? [{ name: 'PDF', extensions: ['pdf'] }]
+        : [{ name: 'PNG Image', extensions: ['png'] }],
+    });
+
+    if (!filePath) return { cancelled: true };
+    if (printDialogWin && !printDialogWin.isDestroyed()) printDialogWin.close();
+
+    const originalPage = pageInfo ? pageInfo.current : null;
+
+    // Capture each page by navigating Amazon's viewer
+    const captures = [];
+    for (const pageNum of pageNums) {
+      if (pageInfo) {
+        await goToPage(wc, pageNum);
+      } else {
+        await wc.executeJavaScript(`window.scrollTo(0, ${(pageNum - 1) * window.innerHeight})`);
+      }
+      await new Promise(r => setTimeout(r, 1500));
+      const img = await wc.capturePage();
+      captures.push(cropBlackBorders(img));
+    }
+
+    // Restore original page
+    if (originalPage) await goToPage(wc, originalPage);
+
+    if (format === 'pdf') {
+      fs.writeFileSync(filePath, buildPDF(captures));
+    } else if (captures.length === 1) {
+      fs.writeFileSync(filePath, captures[0].cropped.toPNG());
+    } else {
+      const dir  = path.dirname(filePath);
+      const base = path.basename(filePath, path.extname(filePath));
+      captures.forEach(({ cropped }, i) => {
+        fs.writeFileSync(path.join(dir, `${base}-${i + 1}.png`), cropped.toPNG());
+      });
+    }
+
+    return { ok: true };
+  });
+
+  ipcMain.handle('print:cancel', () => {
+    if (printDialogWin && !printDialogWin.isDestroyed()) printDialogWin.close();
   });
 
   function resizeContentView() {
@@ -312,7 +453,10 @@ function createWindow() {
 
   win.on('closed', () => {
     ipcMain.removeHandler('open-login');
-    ipcMain.removeHandler('export:pdf');
+    ipcMain.removeHandler('print:open');
+    ipcMain.removeHandler('print:get-info');
+    ipcMain.removeHandler('print:execute');
+    ipcMain.removeHandler('print:cancel');
     ipcMain.removeHandler('nav:back');
     ipcMain.removeHandler('nav:forward');
     ipcMain.removeHandler('nav:reload');

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'" />
+  <title>Print / Export</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      font-size: 13px;
+      color: #1d1d1f;
+      background: #f5f5f7;
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .dialog {
+      padding: 20px 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    h1 { font-size: 15px; font-weight: 600; }
+
+    .subtitle {
+      font-size: 12px;
+      color: #6e6e73;
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .section { display: flex; flex-direction: column; gap: 6px; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #6e6e73;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .radio-group { display: flex; flex-direction: column; gap: 5px; }
+
+    .radio-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 20px;
+    }
+
+    .radio-row input[type="radio"] {
+      width: 14px;
+      height: 14px;
+      accent-color: #007AFF;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .radio-row label {
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .range-inputs {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+    }
+
+    .range-inputs input[type="number"] {
+      width: 50px;
+      height: 20px;
+      border: 1px solid #c7c7cc;
+      border-radius: 5px;
+      padding: 0 6px;
+      font-size: 13px;
+      font-family: inherit;
+      color: #1d1d1f;
+      background: white;
+      text-align: center;
+      -moz-appearance: textfield;
+    }
+
+    .range-inputs input[type="number"]::-webkit-inner-spin-button,
+    .range-inputs input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    .range-inputs input:disabled,
+    .radio-row label.disabled { opacity: 0.38; }
+
+    .separator { height: 1px; background: rgba(0,0,0,0.1); }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding-top: 2px;
+    }
+
+    button {
+      height: 26px;
+      padding: 0 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.1s;
+    }
+
+    button:active:not(:disabled) { opacity: 0.7; }
+
+    #btn-cancel { background: rgba(0,0,0,0.07); color: #1d1d1f; }
+    #btn-cancel:hover { background: rgba(0,0,0,0.11); }
+
+    #btn-save { background: #007AFF; color: white; font-weight: 500; }
+    #btn-save:hover:not(:disabled) { background: #0066d6; }
+    #btn-save:disabled { background: #c7c7cc; cursor: default; }
+  </style>
+</head>
+<body>
+  <div class="dialog">
+    <div>
+      <h1>Print / Export</h1>
+      <p class="subtitle" id="subtitle">Loading…</p>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Format</div>
+      <div class="radio-group">
+        <div class="radio-row">
+          <input type="radio" name="format" id="fmt-pdf" value="pdf" checked />
+          <label for="fmt-pdf">PDF Document</label>
+        </div>
+        <div class="radio-row">
+          <input type="radio" name="format" id="fmt-png" value="png" />
+          <label for="fmt-png">PNG Image</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Pages</div>
+      <div class="radio-group">
+        <div class="radio-row">
+          <input type="radio" name="pages" id="pages-all" value="all" checked />
+          <label for="pages-all">All pages (<span id="page-count">…</span>)</label>
+        </div>
+        <div class="radio-row">
+          <input type="radio" name="pages" id="pages-current" value="current" />
+          <label for="pages-current">Current page (<span id="current-page">…</span>)</label>
+        </div>
+        <div class="radio-row">
+          <input type="radio" name="pages" id="pages-range" value="range" />
+          <label for="pages-range">
+            Pages
+            <span class="range-inputs">
+              <input type="number" id="range-from" min="1" value="1" disabled />
+              <span>–</span>
+              <input type="number" id="range-to" min="1" value="1" disabled />
+            </span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="actions">
+      <button id="btn-cancel">Cancel</button>
+      <button id="btn-save">Save</button>
+    </div>
+  </div>
+
+  <script src="print-dialog.js"></script>
+</body>
+</html>

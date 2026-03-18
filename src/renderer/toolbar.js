@@ -44,11 +44,10 @@ window.api.onNavState(({ canGoBack, canGoForward }) => {
   btnForward.disabled = !canGoForward;
 });
 
-btnExport.addEventListener('click', async () => {
-  btnExport.disabled = true;
-  await window.api.exportPDF();
-  btnExport.disabled = false;
+btnExport.addEventListener('click', () => {
+  window.api.openPrintDialog();
 });
+
 
 window.api.onLoading((isLoading) => {
   if (isLoading) {
