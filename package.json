@@ -1,6 +1,6 @@
 {
   "name": "scribe-notebook",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Kindle Notebook desktop app — read your Scribe notes on macOS and Windows",
   "main": "src/main.js",
   "scripts": {
