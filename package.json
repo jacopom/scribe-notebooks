@@ -2,6 +2,7 @@
   "name": "scribe-notebook",
   "version": "2.1.2",
   "description": "Kindle Notebook desktop app — read your Scribe notes on macOS and Windows",
+  "license": "MIT",
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
