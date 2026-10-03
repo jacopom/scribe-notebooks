@@ -125,14 +125,44 @@ async function clickPageNav(wc, direction) {
   wc.sendInputEvent({ type: 'keyUp',   keyCode });
 }
 
-// Navigate to a specific 1-based page number
+const PAGE_TURN_DELAY_MS = 700;
+const MAX_STALLED_TURNS = 3;
+
+// Navigate to a specific 1-based page number, one arrow-key press at a time.
+// There is no fixed step limit, so long jumps (e.g. page 80 -> page 1) reach
+// their target. Throws if the "Page X of Y" indicator disappears, stops
+// moving, or never lands on the target, so callers never capture the wrong page.
 async function goToPage(wc, target) {
-  for (let attempt = 0; attempt < 60; attempt++) {
-    const info = await readPageInfo(wc);
-    if (!info || info.current === target) break;
-    await clickPageNav(wc, info.current < target ? 'next' : 'prev');
-    await new Promise(r => setTimeout(r, 700));
+  let info = await readPageInfo(wc);
+  if (!info) throw new Error(`Couldn't find the page indicator to go to page ${target}.`);
+  if (target < 1 || target > info.total) {
+    throw new Error(`Page ${target} is outside this notebook (1–${info.total}).`);
   }
+
+  // Generous cap that still guarantees termination if the viewer misbehaves
+  // (e.g. skips pages and oscillates around the target).
+  const maxTurns = Math.abs(target - info.current) * 2 + 10;
+  let stalled = 0;
+  for (let turn = 0; info.current !== target && turn < maxTurns; turn++) {
+    const before = info.current;
+    await clickPageNav(wc, before < target ? 'next' : 'prev');
+    await new Promise(r => setTimeout(r, PAGE_TURN_DELAY_MS));
+    info = await readPageInfo(wc);
+    if (!info) throw new Error(`Lost the page indicator while going to page ${target}.`);
+    stalled = info.current === before ? stalled + 1 : 0;
+    if (stalled >= MAX_STALLED_TURNS) break;
+  }
+
+  if (info.current !== target) {
+    throw new Error(`Couldn't turn to page ${target}: the notebook viewer stopped on page ${info.current}.`);
+  }
+}
+
+function showExportError(parent, detail) {
+  const options = { type: 'error', title: 'Export failed', message: 'Export failed', detail, buttons: ['OK'] };
+  return parent && !parent.isDestroyed()
+    ? dialog.showMessageBox(parent, options)
+    : dialog.showMessageBox(options);
 }
 
 const HOME_URL = 'https://read.amazon.com/kindle-notebook?ref_=neo_mm_yn_na_kfa';
@@ -376,30 +406,47 @@ function createWindow() {
 
     // Capture each page by navigating Amazon's viewer
     const captures = [];
-    for (const pageNum of pageNums) {
-      if (pageInfo) {
-        await goToPage(wc, pageNum);
-      } else {
-        await wc.executeJavaScript(`window.scrollTo(0, ${(pageNum - 1) * window.innerHeight})`);
+    let captureError = null;
+    try {
+      for (const pageNum of pageNums) {
+        if (pageInfo) {
+          await goToPage(wc, pageNum);
+        } else {
+          await wc.executeJavaScript(`window.scrollTo(0, ${(pageNum - 1) * window.innerHeight})`);
+        }
+        await new Promise(r => setTimeout(r, 1500));
+        const img = await wc.capturePage();
+        captures.push(cropBlackBorders(img));
       }
-      await new Promise(r => setTimeout(r, 1500));
-      const img = await wc.capturePage();
-      captures.push(cropBlackBorders(img));
+    } catch (err) {
+      captureError = err;
     }
 
-    // Restore original page
-    if (originalPage) await goToPage(wc, originalPage);
+    // Restore original page, even if the export failed (best effort)
+    if (originalPage) {
+      try { await goToPage(wc, originalPage); } catch { /* keep the export result */ }
+    }
 
-    if (format === 'pdf') {
-      fs.writeFileSync(filePath, buildPDF(captures));
-    } else if (captures.length === 1) {
-      fs.writeFileSync(filePath, captures[0].cropped.toPNG());
-    } else {
-      const dir  = path.dirname(filePath);
-      const base = path.basename(filePath, path.extname(filePath));
-      captures.forEach(({ cropped }, i) => {
-        fs.writeFileSync(path.join(dir, `${base}-${i + 1}.png`), cropped.toPNG());
-      });
+    if (captureError) {
+      await showExportError(win, `${captureError.message}\n\nNothing was saved.`);
+      return { ok: false, error: captureError.message };
+    }
+
+    try {
+      if (format === 'pdf') {
+        fs.writeFileSync(filePath, buildPDF(captures));
+      } else if (captures.length === 1) {
+        fs.writeFileSync(filePath, captures[0].cropped.toPNG());
+      } else {
+        const dir  = path.dirname(filePath);
+        const base = path.basename(filePath, path.extname(filePath));
+        captures.forEach(({ cropped }, i) => {
+          fs.writeFileSync(path.join(dir, `${base}-${i + 1}.png`), cropped.toPNG());
+        });
+      }
+    } catch (err) {
+      await showExportError(win, `Couldn't save the export: ${err.message}`);
+      return { ok: false, error: err.message };
     }
 
     return { ok: true };
